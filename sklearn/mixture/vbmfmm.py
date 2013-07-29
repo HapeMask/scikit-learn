@@ -1,11 +1,20 @@
 import numpy as np
-from scipy.optimize import minimize_scalar
 
 from ..externals.six.moves import xrange
-from .. import cluster
 from .gmm import GMM
 from .dpgmm import log_normalize, digamma
 from .dpmfmm import log_c3k, sample_sphere_3d
+
+try:
+    from scipy.optimize import minimize_scalar as ms
+    def minimize_scalar(f, bounds, maxiter):
+        return ms(f,
+                method = 'bounded', bounds = bounds,
+                options = {'maxiter' : maxiter}).x
+except:
+    from scipy.optimize import fminbound
+    def minimize_scalar(f, bounds, maxiter):
+        return fminbound(f, bounds[0], bounds[1], maxfun=maxiter, disp=0)
 
 def coth(x):
     return np.cosh(x) / np.sinh(x)
@@ -31,16 +40,6 @@ class VBMFMM(GMM):
             n_components, 'diag', random_state=random_state,
             thresh=thresh, min_covar=min_covar,
             n_iter=n_iter, params=params, init_params=init_params)
-
-    def _get_covars(self):
-        return 1. / self._get_precisions()
-
-    def _get_precisions(self):
-        return self.precs_
-
-    def _set_covars(self, covars):
-        raise NotImplementedError('''The variational algorithm does
-        not support setting the covariance parameters.''')
 
     def normalize_means_(self):
         self.means_ /= np.sqrt((self.means_**2.).sum(axis=1))[:,np.newaxis]
@@ -82,16 +81,15 @@ class VBMFMM(GMM):
 
             for k in xrange(self.n_components):
                 self.precs_[k] = minimize_scalar(
-                        lambda x : 0.5*( (1./x) - coth(x) - c[k] )**2.,
-                        method='bounded', bounds=(1e-6, 200.),
-                        options={'maxiter':20}).x
+                    lambda x : 0.5*( (1./x) - coth(x) - c[k] )**2.,
+                    bounds = (1e-6, 200.), maxiter = 32)
 
     def fit(self, X, updates='mp'):
-        if X.ndim == 1:
-            raise ValueError('Need more than 1 data point to fit.')
-
-        if X.shape[1] != 3:
+        if X.ndim != 2 or X.shape[1] != 3:
             raise ValueError('Can only fit 3-dimensional data.')
+
+        if np.any(abs((X**2).sum(axis=1) - 1) > 1e-8):
+            raise ValueError('Can only fit unit vectors.')
 
         N = X.shape[0]
 
@@ -119,7 +117,7 @@ class VBMFMM(GMM):
             mrad_mu = mean_rel_abs_diff(self.means_, prev_means)
             mrad_k = mean_rel_abs_diff(self.precs_, prev_precs)
             if self.verbose:
-                print("Logprob at iteration %d: %1.5e" % (it, logprob.mean()))
+                print('Logprob at iteration %d: %1.5e' % (it, logprob.mean()))
 
             if mrad_mu < self.thresh and mrad_k < self.thresh:
                 if self.verbose:
