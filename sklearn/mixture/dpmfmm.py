@@ -160,8 +160,9 @@ class DPMFMM:
         return len(self.components)
 
     def _remap_z(self):
-        # Re-assign indicator variables to span [0, K-1] where K is the
-        # number of occupied clusters, sorted by size.
+        """Re-assign cluster indicator variables to span [0, n_components-1],
+        sorted by size.
+        """
         sorted_ids = list(sorted(self.components.keys(),
             key = lambda i : self.components[i].size)[::-1])
         sorted_comps = [self.components[i] for i in sorted_ids]
@@ -205,9 +206,9 @@ class DPMFMM:
                 # Compute probability of joining a new cluster. This is
                 # actually approximating an integral over the cluster
                 # parameters, but it is doing so via MC integration with one
-                # step.
-                # The prior on cluster centers is non-informative (uniform on
-                # sphere, 1/4pi), and the prior on k is a Gamma distribution.
+                # sample.
+                # The prior on cluster centers is non-informative (uniform over
+                # the unit sphere), and the prior on k is a Gamma distribution.
                 p_new = np.log(self.alpha) - log_alpha_plus_n_minus_1
                 p_zi[-1] = p_new + log_pdf_vmf_3d(X[i], sample_vmf_3d(x_mean, 1), np.random.gamma(2,30))
 
@@ -228,23 +229,13 @@ class DPMFMM:
                     self.components[k_new].add_point(X[i])
                 else:
                     new_kappa = np.random.gamma(2,10)
-                    #new_mean = sample_vmf_3d(X[i], new_kappa)
                     new_mean = X[i]
                     self.components[k_new] = vMFComponent(new_mean, new_kappa, [X[i]])
 
-            print("NC:", self.n_components)
         self.X_ = X
 
     def predict(self, X):
-        if self.n_components < 1:
-            raise RuntimeError("predict() called before fit().")
-
-        """
-        p = np.hstack([comp.pdf(X)[:,np.newaxis] for comp in self.components.values()])
-        return np.argmax(p, axis = 1)
-        """
-
-        if np.any(self.X_ != X):
+        if not hasattr(self, "X_") or np.any(self.X_ != X):
             self.fit(X)
 
         return self.z
