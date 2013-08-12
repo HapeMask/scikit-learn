@@ -204,7 +204,7 @@ class VBMFMM(GMM):
                 f = lambda x: (1./x) - coth(x)
             else:
                 p = X.shape[1] / 2. - 1
-                f = lambda x : ((p / x) - (ivp(p, x) / iv(p, x)))
+                f = lambda x: ((p / x) - (ivp(p, x) / iv(p, x)))
 
             for k in xrange(self.n_components):
                 self.precs_[k] = fminbound(
