@@ -201,15 +201,14 @@ class VBMFMM(GMM):
             c = -(self.b + (self.means_ * x_nn).sum(axis=1)) / (self.a + N_bar)
 
             if X.shape[1] == 3:
-                f = lambda x: (1./x) - coth(x)
+                priorfunc = lambda x: (1./x) - coth(x)
             else:
                 p = X.shape[1] / 2. - 1
-                f = lambda x: ((p / x) - (ivp(p, x) / iv(p, x)))
+                priorfunc = lambda x: ((p / x) - (ivp(p, x) / iv(p, x)))
 
             for k in xrange(self.n_components):
-                self.precs_[k] = fminbound(
-                    lambda x: 0.5*(f(x) - c[k])**2,
-                    1e-6, 200., maxfun=20, disp=0)
+                f_k = lambda x: 0.5*(priorfunc(x)-c[k])**2
+                self.precs_[k] = fminbound(f_k, 1e-6, 200., maxfun=15, disp=0)
 
     def fit(self, X, y=None):
         X = array2d(X)
