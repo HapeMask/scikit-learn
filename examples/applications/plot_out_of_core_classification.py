@@ -36,7 +36,6 @@ import re
 import sgmllib
 import tarfile
 import time
-import urllib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -48,6 +47,8 @@ from sklearn.linear_model.stochastic_gradient import SGDClassifier
 from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn.linear_model import Perceptron
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.externals import six
+from sklearn.externals.six.moves import urllib
 
 
 def _not_in_sphinx():
@@ -162,8 +163,8 @@ def stream_reuters_documents(data_path=None):
                       end='')
 
         archive_path = os.path.join(data_path, ARCHIVE_FILENAME)
-        urllib.urlretrieve(DOWNLOAD_URL, filename=archive_path,
-                           reporthook=progress)
+        urllib.request.urlretrieve(DOWNLOAD_URL, filename=archive_path,
+                                   reporthook=progress)
         if _not_in_sphinx():
             print('\r', end='')
         print("untarring Reuters dataset...")
@@ -282,7 +283,7 @@ for i, (X_train_text, y_train) in enumerate(minibatch_iterators):
     X_train = vectorizer.transform(X_train_text)
     total_vect_time += time.time() - tick
 
-    for cls_name, cls in partial_fit_classifiers.items():
+    for cls_name, cls in six.iteritems(partial_fit_classifiers):
         tick = time.time()
         # update estimator with examples in the current mini-batch
         cls.partial_fit(X_train, y_train, classes=all_classes)
@@ -327,7 +328,7 @@ cls_names = list(sorted(cls_stats.keys()))
 
 # Plot accuracy evolution
 plt.figure()
-for _, stats in sorted(cls_stats.items()):
+for _, stats in sorted(six.iteritems(cls_stats)):
     # Plot accuracy evolution with #examples
     accuracy, n_examples = zip(*stats['accuracy_history'])
     plot_accuracy(n_examples, accuracy, "training examples (#)")
@@ -336,7 +337,7 @@ for _, stats in sorted(cls_stats.items()):
 plt.legend(cls_names, loc='best')
 
 plt.figure()
-for _, stats in sorted(cls_stats.items()):
+for _, stats in sorted(six.iteritems(cls_stats)):
     # Plot accuracy evolution with runtime
     accuracy, runtime = zip(*stats['runtime_history'])
     plot_accuracy(runtime, accuracy, 'runtime (s)')
@@ -348,7 +349,7 @@ plt.legend(cls_names, loc='best')
 plt.figure()
 fig = plt.gcf()
 cls_runtime = []
-for cls_name, stats in sorted(cls_stats.items()):
+for cls_name, stats in sorted(six.iteritems(cls_stats)):
     cls_runtime.append(stats['total_fit_time'])
 
 cls_runtime.append(total_vect_time)
@@ -383,7 +384,7 @@ plt.figure()
 #fig = plt.gcf()
 cls_runtime = []
 cls_names = list(sorted(cls_stats.keys()))
-for cls_name, stats in sorted(cls_stats.items()):
+for cls_name, stats in sorted(six.iteritems(cls_stats)):
     cls_runtime.append(stats['prediction_time'])
 cls_runtime.append(parsing_time)
 cls_names.append('Read/Parse\n+Feat.Extr.')

@@ -8,6 +8,7 @@ sequences as 'fingerprints'.
 """
 # Author: Olivier Grisel <olivier.grisel@ensta.org>
 # License: Simplified BSD
+from __future__ import print_function
 
 import sys
 

@@ -30,6 +30,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from sklearn.cluster import KMeans
 from sklearn import datasets
+from sklearn.externals import six
 
 np.random.seed(5)
 
@@ -45,7 +46,7 @@ estimators = {'k_means_iris_3': KMeans(n_clusters=3),
 
 
 fignum = 1
-for name, est in estimators.iteritems():
+for name, est in six.iteritems(estimators):
     fig = pl.figure(fignum, figsize=(4, 3))
     pl.clf()
     ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)

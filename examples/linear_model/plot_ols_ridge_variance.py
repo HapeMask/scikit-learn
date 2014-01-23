@@ -32,6 +32,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn import linear_model
+from sklearn.externals import six
 
 X_train = np.c_[.5, 1].T
 y_train = [.5, 1]
@@ -43,7 +44,7 @@ classifiers = dict(ols=linear_model.LinearRegression(),
                    ridge=linear_model.Ridge(alpha=.1))
 
 fignum = 1
-for name, clf in classifiers.iteritems():
+for name, clf in six.iteritems(classifiers):
     fig = plt.figure(fignum, figsize=(4, 3))
     plt.clf()
     plt.title(name)

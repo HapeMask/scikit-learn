@@ -38,6 +38,7 @@ It is worth noting that RandomForests and ExtraTrees can be fitted in parallel
 on many cores as each tree is built independently of the others. AdaBoost's
 samples are built sequentially and so do not use multiple cores.
 """
+from __future__ import print_function
 print(__doc__)
 
 import numpy as np
@@ -99,7 +100,7 @@ for pair in ([0, 1], [0, 2], [2, 3]):
         model_details = model_title
         if hasattr(model, "estimators_"):
             model_details += " with {} estimators".format(len(model.estimators_))
-        print model_details + " with features", pair, "has a score of", scores
+        print(model_details + " with features", pair, "has a score of", scores)
 
         pl.subplot(3, 4, plot_idx)
         if plot_idx <= len(models):

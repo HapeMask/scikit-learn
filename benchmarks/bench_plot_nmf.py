@@ -14,6 +14,7 @@ from scipy.linalg import norm
 from sklearn.decomposition.nmf import NMF, _initialize_nmf
 from sklearn.datasets.samples_generator import make_low_rank_matrix
 from sklearn.externals.six.moves import xrange
+from sklearn.externals import six
 
 
 def alt_nnmf(V, r, max_iter=1000, tol=1e-3, R=None):
@@ -153,7 +154,7 @@ if __name__ == '__main__':
     for i, results in enumerate((timeset, err)):
         fig = plt.figure('scikit-learn Non-Negative Matrix Factorization benchmark results')
         ax = fig.gca(projection='3d')
-        for c, (label, timings) in zip('rbgcm', sorted(results.iteritems())):
+        for c, (label, timings) in zip('rbgcm', sorted(six.iteritems(results))):
             X, Y = np.meshgrid(samples_range, features_range)
             Z = np.asarray(timings).reshape(samples_range.shape[0],
                                             features_range.shape[0])

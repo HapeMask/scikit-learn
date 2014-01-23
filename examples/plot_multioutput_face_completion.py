@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.datasets import fetch_olivetti_faces
 from sklearn.utils.validation import check_random_state
+from sklearn.externals import six
 
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.neighbors import KNeighborsRegressor
@@ -54,7 +55,7 @@ ESTIMATORS = {
 }
 
 y_test_predict = dict()
-for name, estimator in ESTIMATORS.items():
+for name, estimator in six.iteritems(ESTIMATORS):
     estimator.fit(X_train, y_train)
     y_test_predict[name] = estimator.predict(X_test)
 

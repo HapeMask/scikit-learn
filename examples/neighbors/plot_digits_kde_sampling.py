@@ -10,6 +10,8 @@ new samples can be drawn.  These new samples reflect the underlying model
 of the data.
 """
 
+from __future__ import print_function
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -31,7 +33,7 @@ params = {'bandwidth': np.logspace(-1, 1, 20)}
 grid = GridSearchCV(KernelDensity(), params)
 grid.fit(data)
 
-print "best bandwidth: {0}".format(grid.best_estimator_.bandwidth)
+print("best bandwidth: {0}".format(grid.best_estimator_.bandwidth))
 
 # use the best estimator to compute the kernel density estimate
 kde = grid.best_estimator_

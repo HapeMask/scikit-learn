@@ -32,6 +32,7 @@ from scipy import stats
 
 from sklearn import svm
 from sklearn.covariance import EllipticEnvelope
+from sklearn.externals import six
 
 # Example settings
 n_samples = 200
@@ -63,7 +64,7 @@ for i, offset in enumerate(clusters_separation):
 
     # Fit the model with the One-Class SVM
     pl.figure(figsize=(10, 5))
-    for i, (clf_name, clf) in enumerate(classifiers.iteritems()):
+    for i, (clf_name, clf) in enumerate(six.iteritems(classifiers)):
         # fit the data and tag outliers
         clf.fit(X)
         y_pred = clf.decision_function(X).ravel()

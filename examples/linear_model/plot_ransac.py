@@ -7,6 +7,7 @@ In this example we see how to robustly fit a linear model to faulty data using
 the RANSAC algorithm.
 
 """
+from __future__ import print_function
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -42,8 +43,8 @@ line_y = model.predict(line_X[:, np.newaxis])
 line_y_ransac = model_ransac.predict(line_X[:, np.newaxis])
 
 # Compare estimated coefficients
-print "Estimated coefficients (true, normal, RANSAC):"
-print coef, model.coef_, model_ransac.estimator_.coef_
+print("Estimated coefficients (true, normal, RANSAC):")
+print(coef, model.coef_, model_ransac.estimator_.coef_)
 
 plt.plot(X[inlier_mask], y[inlier_mask], '.g', label='Inliers')
 plt.plot(X[outlier_mask], y[outlier_mask], '.r', label='Outliers')

@@ -10,6 +10,7 @@ In this examples we will use a movie review dataset.
 """
 # Author: Olivier Grisel <olivier.grisel@ensta.org>
 # License: Simplified BSD
+from __future__ import print_function
 
 import sys
 from sklearn.feature_extraction.text import TfidfVectorizer

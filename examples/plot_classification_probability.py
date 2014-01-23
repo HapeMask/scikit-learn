@@ -21,6 +21,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn import datasets
+from sklearn.externals import six
 
 iris = datasets.load_iris()
 X = iris.data[:, 0:2]  # we only take the first two features for visualization
@@ -42,7 +43,7 @@ n_classifiers = len(classifiers)
 pl.figure(figsize=(3 * 2, n_classifiers * 2))
 pl.subplots_adjust(bottom=.2, top=.95)
 
-for index, (name, classifier) in enumerate(classifiers.iteritems()):
+for index, (name, classifier) in enumerate(six.iteritems(classifiers)):
     classifier.fit(X, y)
 
     y_pred = classifier.predict(X)

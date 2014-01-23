@@ -13,6 +13,7 @@ import numpy as np
 
 from sklearn.linear_model import lars_path, orthogonal_mp
 from sklearn.datasets.samples_generator import make_sparse_coded_signal
+from sklearn.externals import six
 
 
 def compute_bench(samples_range, features_range):
@@ -107,12 +108,12 @@ if __name__ == '__main__':
 
     import pylab as pl
     fig = pl.figure('scikit-learn OMP vs. LARS benchmark results')
-    for i, (label, timings) in enumerate(sorted(results.iteritems())):
+    for i, (label, timings) in enumerate(sorted(six.iteritems(results))):
         ax = fig.add_subplot(1, 2, i)
         vmax = max(1 - timings.min(), -1 + timings.max())
         pl.matshow(timings, fignum=False, vmin=1 - vmax, vmax=1 + vmax)
-        ax.set_xticklabels([''] + map(str, samples_range))
-        ax.set_yticklabels([''] + map(str, features_range))
+        ax.set_xticklabels([''] + [str(x) for x in samples_range])
+        ax.set_yticklabels([''] + [str(x) for x in features_range])
         pl.xlabel('n_samples')
         pl.ylabel('n_features')
         pl.title(label)

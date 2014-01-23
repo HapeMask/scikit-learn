@@ -1,4 +1,5 @@
 """Generate skeletons from the example code"""
+from __future__ import print_function
 import os
 
 exercise_dir = os.path.dirname(__file__)

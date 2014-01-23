@@ -34,6 +34,7 @@ import numpy as np
 
 from sklearn import datasets
 from sklearn.cross_validation import StratifiedKFold
+from sklearn.externals import six
 from sklearn.externals.six.moves import xrange
 from sklearn.mixture import GMM
 
@@ -79,7 +80,7 @@ pl.subplots_adjust(bottom=.01, top=0.95, hspace=.15, wspace=.05,
                    left=.01, right=.99)
 
 
-for index, (name, classifier) in enumerate(classifiers.iteritems()):
+for index, (name, classifier) in enumerate(six.iteritems(classifiers)):
     # Since we have class labels for the training data, we can
     # initialize the GMM parameters in a supervised manner.
     classifier.means_ = np.array([X_train[y_train == i].mean(axis=0)

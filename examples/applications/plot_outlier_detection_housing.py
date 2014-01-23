@@ -56,6 +56,7 @@ from sklearn.svm import OneClassSVM
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from sklearn.datasets import load_boston
+from sklearn.externals import six
 
 # Get data
 X1 = load_boston()['data'][:, [8, 10]]  # two clusters
@@ -75,7 +76,7 @@ legend2 = {}
 # Learn a frontier for outlier detection with several classifiers
 xx1, yy1 = np.meshgrid(np.linspace(-8, 28, 500), np.linspace(3, 40, 500))
 xx2, yy2 = np.meshgrid(np.linspace(3, 10, 500), np.linspace(-5, 45, 500))
-for i, (clf_name, clf) in enumerate(classifiers.iteritems()):
+for i, (clf_name, clf) in enumerate(six.iteritems(classifiers)):
     plt.figure(1)
     clf.fit(X1)
     Z1 = clf.decision_function(np.c_[xx1.ravel(), yy1.ravel()])
@@ -100,10 +101,12 @@ plt.annotate("several confounded points", xy=(24, 19),
              xytext=(13, 10), bbox=bbox_args, arrowprops=arrow_args)
 plt.xlim((xx1.min(), xx1.max()))
 plt.ylim((yy1.min(), yy1.max()))
-plt.legend((legend1.values()[0].collections[0],
-            legend1.values()[1].collections[0],
-            legend1.values()[2].collections[0]),
-           (legend1.keys()[0], legend1.keys()[1], legend1.keys()[2]),
+plt.legend((list(legend1.values())[0].collections[0],
+            list(legend1.values())[1].collections[0],
+            list(legend1.values())[2].collections[0]),
+           (list(legend1.keys())[0],
+            list(legend1.keys())[1],
+            list(legend1.keys())[2]),
            loc="upper center",
            prop=matplotlib.font_manager.FontProperties(size=12))
 plt.ylabel("accessibility to radial highways")
@@ -114,10 +117,12 @@ plt.title("Outlier detection on a real data set (boston housing)")
 plt.scatter(X2[:, 0], X2[:, 1], color='black')
 plt.xlim((xx2.min(), xx2.max()))
 plt.ylim((yy2.min(), yy2.max()))
-plt.legend((legend2.values()[0].collections[0],
-            legend2.values()[1].collections[0],
-            legend2.values()[2].collections[0]),
-           (legend2.keys()[0], legend2.keys()[1], legend2.keys()[2]),
+plt.legend((list(legend2.values())[0].collections[0],
+            list(legend2.values())[1].collections[0],
+            list(legend2.values())[2].collections[0]),
+           (list(legend2.keys())[0],
+            list(legend2.keys())[1],
+            list(legend2.keys())[2]),
            loc="upper center",
            prop=matplotlib.font_manager.FontProperties(size=12))
 plt.ylabel("% lower status of the population")

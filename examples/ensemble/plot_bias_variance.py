@@ -71,6 +71,7 @@ from matplotlib import pyplot as plt
 
 from sklearn.ensemble import BaggingRegressor
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.externals.six.moves import xrange
 
 # Settings
 n_repeat = 50       # Number of iterations for computing expectations

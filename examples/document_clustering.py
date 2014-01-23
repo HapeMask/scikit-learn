@@ -60,6 +60,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import Normalizer
 from sklearn import metrics
+from sklearn.externals.six.moves import xrange
 
 from sklearn.cluster import KMeans, MiniBatchKMeans
 

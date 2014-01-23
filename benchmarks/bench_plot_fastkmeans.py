@@ -7,6 +7,7 @@ import numpy as np
 from numpy import random as nr
 
 from sklearn.cluster.k_means_ import KMeans, MiniBatchKMeans
+from sklearn.externals import six
 
 
 def compute_bench(samples_range, features_range):
@@ -102,15 +103,15 @@ if __name__ == '__main__':
     results = compute_bench(samples_range, features_range)
     results_2 = compute_bench_2(chunks)
 
-    max_time = max([max(i) for i in [t for (label, t) in results.iteritems()
+    max_time = max([max(i) for i in [t for (label, t) in six.iteritems(results)
                          if "speed" in label]])
     max_inertia = max([max(i) for i in [
-                        t for (label, t) in results.iteritems()
+                        t for (label, t) in six.iteritems(results)
                             if "speed" not in label]])
 
     fig = plt.figure('scikit-learn K-Means benchmark results')
     for c, (label, timings) in zip('brcy',
-                                    sorted(results.iteritems())):
+                                    sorted(six.iteritems(results))):
         if 'speed' in label:
             ax = fig.add_subplot(2, 2, 1, projection='3d')
             ax.set_zlim3d(0.0, max_time * 1.1)
@@ -127,7 +128,7 @@ if __name__ == '__main__':
 
     i = 0
     for c, (label, timings) in zip('br',
-                                   sorted(results_2.iteritems())):
+                                   sorted(six.iteritems(results_2))):
         i += 1
         ax = fig.add_subplot(2, 2, i + 2)
         y = np.asarray(timings)

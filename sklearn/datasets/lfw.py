@@ -28,12 +28,12 @@ from os.path import join, exists, isdir
 
 import logging
 import numpy as np
-import urllib
 
 from .base import get_data_home, Bunch
 from ..externals.joblib import Memory
 
 from ..externals.six import b, u
+from ..externals.six.moves import urllib
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ def check_fetch_lfw(data_home=None, funneled=True, download_if_missing=True):
             if download_if_missing:
                 url = BASE_URL + target_filename
                 logger.warn("Downloading LFW metadata: %s", url)
-                urllib.urlretrieve(url, target_filepath)
+                urllib.request.urlretrieve(url, target_filepath)
             else:
                 raise IOError("%s is missing" % target_filepath)
 
@@ -93,7 +93,7 @@ def check_fetch_lfw(data_home=None, funneled=True, download_if_missing=True):
         if not exists(archive_path):
             if download_if_missing:
                 logger.warn("Downloading LFW data (~200MB): %s", archive_url)
-                urllib.urlretrieve(archive_url, archive_path)
+                urllib.request.urlretrieve(archive_url, archive_path)
             else:
                 raise IOError("%s is missing" % target_filepath)
 

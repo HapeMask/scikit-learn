@@ -7,6 +7,8 @@ example files.
 Files that generate images should start with 'plot'
 
 """
+from __future__ import print_function
+
 from time import time
 import os
 import re
@@ -14,9 +16,6 @@ import shutil
 import traceback
 import glob
 import sys
-from StringIO import StringIO
-import cPickle
-import urllib2
 import gzip
 import posixpath
 import subprocess
@@ -34,6 +33,12 @@ import tokenize
 import numpy as np
 
 from sklearn.externals import joblib
+from sklearn.externals import six
+from sklearn.externals.six.moves import urllib
+from sklearn.externals.six.moves import cPickle
+from sklearn.externals.six import StringIO
+
+next_fn = lambda it : lambda : six.next(it)
 
 ###############################################################################
 # A tee object to redict streams to multiple outputs
@@ -59,8 +64,8 @@ class Tee(object):
 def _get_data(url):
     """Helper function to get data over http or from a local file"""
     if url.startswith('http://'):
-        resp = urllib2.urlopen(url)
-        encoding = resp.headers.dict.get('content-encoding', 'plain')
+        resp = urllib.request.urlopen(url)
+        encoding = resp.headers.get('content-encoding', 'plain')
         data = resp.read()
         if encoding == 'plain':
             pass
@@ -74,7 +79,7 @@ def _get_data(url):
             data = fid.read()
         fid.close()
 
-    return data
+    return six.text_type(data)
 
 mem = joblib.Memory(cachedir='_build')
 get_data = mem.cache(_get_data)
@@ -227,7 +232,7 @@ class SphinxDocLinkResolver(object):
         if full_name in self._searchindex['objects']:
             value = self._searchindex['objects'][full_name]
             if isinstance(value, dict):
-                value = value[value.keys()[0]]
+                value = value[list(value.keys())[0]]
             fname_idx = value[0]
         elif cobj['module_short'] in self._searchindex['objects']:
             value = self._searchindex['objects'][cobj['module_short']]
@@ -374,14 +379,14 @@ carousel_thumbs = {'plot_classifier_comparison_1.png': (1, 600),
 def extract_docstring(filename, ignore_heading=False):
     """ Extract a module-level docstring, if any
     """
-    lines = file(filename).readlines()
+    lines = open(filename).readlines()
     start_row = 0
     if lines[0].startswith('#!'):
         lines.pop(0)
         start_row = 1
     docstring = ''
     first_par = ''
-    tokens = tokenize.generate_tokens(iter(lines).next)
+    tokens = tokenize.generate_tokens(next_fn(iter(lines)))
     for tok_type, tok_content, _, (erow, _), _ in tokens:
         tok_type = token.tok_name[tok_type]
         if tok_type in ('NEWLINE', 'COMMENT', 'NL', 'INDENT', 'DEDENT'):
@@ -426,7 +431,7 @@ def generate_example_rst(app):
         os.makedirs(root_dir)
 
     # we create an index.rst with all examples
-    fhindex = file(os.path.join(root_dir, 'index.rst'), 'w')
+    fhindex = open(os.path.join(root_dir, 'index.rst'), 'w')
     #Note: The sidebar button has been removed from the examples page for now
     #      due to how it messes up the layout. Will be fixed at a later point
     fhindex.write("""\
@@ -578,12 +583,12 @@ Examples
 def extract_line_count(filename, target_dir):
     # Extract the line count of a file
     example_file = os.path.join(target_dir, filename)
-    lines = file(example_file).readlines()
+    lines = open(example_file).readlines()
     start_row = 0
     if lines and lines[0].startswith('#!'):
         lines.pop(0)
         start_row = 1
-    tokens = tokenize.generate_tokens(lines.__iter__().next)
+    tokens = tokenize.generate_tokens(next_fn(lines.__iter__()))
     check_docstring = True
     erow_docstring = 0
     for tok_type, _, _, (erow, _), _ in tokens:
@@ -598,7 +603,7 @@ def extract_line_count(filename, target_dir):
 
 def line_count_sort(file_list, target_dir):
     # Sort the list of examples by line-count
-    new_list = filter(lambda x: x.endswith('.py'), file_list)
+    new_list = [x for x in file_list if x.endswith('.py')]
     unsorted = np.zeros(shape=(len(new_list), 2))
     unsorted = unsorted.astype(np.object)
     for count, exmpl in enumerate(new_list):
@@ -622,11 +627,11 @@ def generate_dir_rst(dir, fhindex, example_dir, root_dir, plot_gallery):
         target_dir = root_dir
         src_dir = example_dir
     if not os.path.exists(os.path.join(src_dir, 'README.txt')):
-        print 80 * '_'
-        print ('Example directory %s does not have a README.txt file' %
+        print(80 * '_')
+        print('Example directory %s does not have a README.txt file' %
                src_dir)
-        print 'Skipping this directory'
-        print 80 * '_'
+        print('Skipping this directory')
+        print(80 * '_')
         return
     fhindex.write("""
 
@@ -634,7 +639,7 @@ def generate_dir_rst(dir, fhindex, example_dir, root_dir, plot_gallery):
 %s
 
 
-""" % file(os.path.join(src_dir, 'README.txt')).read())
+""" % open(os.path.join(src_dir, 'README.txt')).read())
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
     sorted_listdir = line_count_sort(os.listdir(src_dir),
@@ -716,7 +721,7 @@ def make_thumbnail(in_fname, out_fname, width, height):
 
     # insert centered
     thumb = Image.new('RGB', (width, height), (255, 255, 255))
-    pos_insert = ((width - width_sc) / 2, (height - height_sc) / 2)
+    pos_insert = ((width - width_sc) // 2, (height - height_sc) // 2)
     thumb.paste(img, pos_insert)
 
     thumb.save(out_fname)
@@ -796,7 +801,7 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
         if not os.path.exists(first_image_file) or \
            os.stat(first_image_file).st_mtime <= os.stat(src_file).st_mtime:
             # We need to execute the code
-            print 'plotting %s' % fname
+            print('plotting %s' % fname)
             t0 = time()
             import matplotlib.pyplot as plt
             plt.close('all')
@@ -810,17 +815,17 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
                 my_stdout = Tee(sys.stdout, my_buffer)
                 sys.stdout = my_stdout
                 my_globals = {'pl': plt}
-                execfile(os.path.basename(src_file), my_globals)
+                exec(open(os.path.basename(src_file)).read(), my_globals)
                 time_elapsed = time() - t0
                 sys.stdout = orig_stdout
                 my_stdout = my_buffer.getvalue()
 
                 # get variables so we can later add links to the documentation
                 example_code_obj = {}
-                for var_name, var in my_globals.iteritems():
+                for var_name, var in six.iteritems(my_globals):
                     if not hasattr(var, '__module__'):
                         continue
-                    if not isinstance(var.__module__, basestring):
+                    if not isinstance(var.__module__, six.string_types):
                         continue
                     if var.__module__.split('.')[0] not in DOCMODULES:
                         continue
@@ -864,7 +869,7 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
                                 continue
                             if not hasattr(this_fun, '__module__'):
                                 continue
-                            if not isinstance(this_fun.__module__, basestring):
+                            if not isinstance(this_fun.__module__, six.string_types):
                                 continue
                             if (this_fun.__module__.split('.')[0]
                                     not in DOCMODULES):
@@ -917,15 +922,15 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
                     plt.savefig(image_path % fig_num)
                     figure_list.append(image_fname % fig_num)
             except:
-                print 80 * '_'
-                print '%s is not compiling:' % fname
+                print(80 * '_')
+                print('%s is not compiling:' % fname)
                 traceback.print_exc()
-                print 80 * '_'
+                print(80 * '_')
             finally:
                 os.chdir(cwd)
                 sys.stdout = orig_stdout
 
-            print " - time elapsed : %.2g sec" % time_elapsed
+            print(" - time elapsed : %.2g sec" % time_elapsed)
         else:
             figure_list = [f[len(image_dir):]
                             for f in glob.glob(image_path % '[1-9]')]
@@ -983,7 +988,7 @@ def embed_code_links(app, exception):
     try:
         if exception is not None:
             return
-        print 'Embedding documentation hyperlinks in examples..'
+        print('Embedding documentation hyperlinks in examples..')
 
         # Add resolvers for the packages for which we want to show links
         doc_resolvers = {}
@@ -1010,7 +1015,7 @@ def embed_code_links(app, exception):
 
         for dirpath, _, filenames in os.walk(html_example_dir):
             for fname in filenames:
-                print '\tprocessing: %s' % fname
+                print('\tprocessing: %s' % fname)
                 full_fname = os.path.join(html_example_dir, dirpath, fname)
                 subpath = dirpath[len(html_example_dir) + 1:]
                 pickle_fname = os.path.join(example_dir, subpath,
@@ -1023,7 +1028,7 @@ def embed_code_links(app, exception):
                     fid.close()
                     str_repl = {}
                     # generate replacement strings with the links
-                    for name, cobj in example_code_obj.iteritems():
+                    for name, cobj in six.iteritems(example_code_obj):
                         this_module = cobj['module'].split('.')[0]
 
                         if this_module not in doc_resolvers:
@@ -1044,19 +1049,19 @@ def embed_code_links(app, exception):
                         with open(full_fname, 'wb') as fid:
                             for line in lines_in:
                                 line = line.decode('utf-8')
-                                for name, link in str_repl.iteritems():
+                                for name, link in six.iteritems(str_repl):
                                     line = line.replace(name, link)
                                 fid.write(line.encode('utf-8'))
-    except urllib2.HTTPError, e:
-        print ("The following HTTP Error has occurred:\n")
-        print e.code
-    except urllib2.URLError, e:
-        print ("\n...\n"
-               "Warning: Embedding the documentation hyperlinks requires "
-               "internet access.\nPlease check your network connection.\n"
-               "Unable to continue embedding due to a URL Error: \n")
-        print e.args
-    print '[done]'
+    except urllib.error.HTTPError as e:
+        print("The following HTTP Error has occurred:\n")
+        print(e.code)
+    except urllib.error.URLError as e:
+        print("\n...\n"
+              "Warning: Embedding the documentation hyperlinks requires "
+              "internet access.\nPlease check your network connection.\n"
+              "Unable to continue embedding due to a URL Error: \n")
+        print(e.args)
+    print('[done]')
 
 
 def setup(app):

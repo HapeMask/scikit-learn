@@ -51,6 +51,7 @@ import pylab as pl
 from sklearn.datasets.base import Bunch
 from sklearn.datasets import fetch_species_distributions
 from sklearn.datasets.species_distributions import construct_grids
+from sklearn.externals import six
 from sklearn import svm, metrics
 
 # if basemap is available, we'll use it.
@@ -77,7 +78,7 @@ def create_species_bunch(species_name,
 
     points = dict(test=test, train=train)
 
-    for label, pts in points.iteritems():
+    for label, pts in six.iteritems(points):
         # choose points associated with the desired species
         pts = pts[pts['species'] == species_name]
         bunch['pts_%s' % label] = pts
